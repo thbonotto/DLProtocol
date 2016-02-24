@@ -7,11 +7,14 @@
 
 #pragma once 
 
+#include <string>
+
 namespace ptc {
 
 class DeviceDriver {
 public:
-	DeviceDriver();
+	DeviceDriver(std::string device, std::string as, int baud);
+	void sendMessage(std::string& message);
 	virtual ~DeviceDriver();
 };
 
