@@ -8,16 +8,17 @@
  *
  */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <string>
+#include "DeviceDriver.h"
+#include "Notifier.h"
+#include "DataLinkProtocol.h"
 
+using namespace ptc;
 
 int main() {
-	sendMessage("","/dev/ttyUSB1");
+	DeviceDriver uart{"/dev/ttyUSB1","",9600};
+	Notifier* reader;
+	DataLinkProtocol protocol{&uart,reader};
+	std::string testMsg{"Primeira Mensagem de Teste"};
+	protocol.prepareAndSendMessage(testMsg);
 	return 0;
 }
