@@ -13,7 +13,7 @@ class DatagramInterface {
 public:
 	DatagramInterface(char *dev);
 	virtual ~DatagramInterface();
-	const int getFileDescriptor() const{
+	const int& getFileDescriptor() const{
 		return this->fd;
 	};
 private:

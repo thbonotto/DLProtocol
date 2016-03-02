@@ -26,6 +26,7 @@ public:
 	virtual ~DataLinkProtocol();
 private:
 	void makeCRC(std::string& message, std::string& messageAndCRC);
+	void checkCRC(std::string& message, std::string& messageAndCRC);
 	void sendFrameThread();
 	void receiveFrameThread();
 	DeviceDriver * mDeviceDriver;

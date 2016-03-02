@@ -6,16 +6,22 @@
  */
 
 #pragma once 
-
+#include <termios.h>
 #include <string>
 
 namespace ptc {
 
 class DeviceDriver {
 public:
-	DeviceDriver(std::string device, std::string as, int baud);
-	void sendMessage(std::string& message);
+	DeviceDriver(const std::string& devicePath);
+	void receiveByte(std::string& buffer);
+	void sendByte(const std::string& message);
 	virtual ~DeviceDriver();
+private:
+	int tty_fd;
+	struct termios tio;
+	struct termios stdio;
+	struct termios old_stdio;
 };
 
 } /* namespace ptc */
