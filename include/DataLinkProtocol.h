@@ -21,8 +21,13 @@ class NotifyCallback {
 
 class DataLinkProtocol {
 public:
+	const char PDU=0;
+	const char ACK=1;
+
+
+
 	DataLinkProtocol(DeviceDriver* deviceDriver, NotifyCallback* notifyCB );
-	void prepareAndSendMessage(std::string& message);
+	void prepareAndSendMessage(uint8_t sequence, uint8_t tipo, uint8_t protocol, std::string& message);
 	virtual ~DataLinkProtocol();
 private:
 	void makeCRC(std::string& message, std::string& messageAndCRC);

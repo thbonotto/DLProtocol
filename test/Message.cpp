@@ -17,21 +17,19 @@ using namespace ptc;
 int main() {
 	DeviceDriver uart { "/dev/ttyUSB0" };
 	DataLinkProtocol protocolo{&uart,nullptr};
-	std::string mes{"Mensagem"};
-	protocolo.prepareAndSendMessage(mes);
-//	const char sentinel1 = 0x7E; // ~
-//	std::string buffer;
-//
-//	uart.sendByte(std::string{sentinel1});
-//	while (true) {
-//
-//		try {
-//			uart.receiveByte(buffer);
-//			std::cout << buffer;
-//		} catch (...) {
-//		}
-//
-//	}
+	std::string mes{"\n\rMensagem"};
+	protocolo.prepareAndSendMessage('a','b','c',mes);
+	const char sentinel1 = 0x7E; // ~
+	std::string buffer;
+	while (true) {
+
+		try {
+			uart.receiveByte(buffer);
+			std::cout << buffer;
+		} catch (...) {
+		}
+
+	}
 //
 ////	Notifier* reader;
 //	DataLinkProtocol protocol{&uart,reader};
