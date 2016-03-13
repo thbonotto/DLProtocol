@@ -14,8 +14,8 @@ namespace ptc {
 class DeviceDriver {
 public:
 	DeviceDriver(const std::string& devicePath);
-	void receiveByte(std::string& buffer);
-	void sendByte(const std::string& message);
+	void receiveByte(char* buffer, size_t tamanho);
+	void sendByte(const char* mensagem, size_t tamanho);
 	virtual ~DeviceDriver();
 private:
 	int tty_fd;

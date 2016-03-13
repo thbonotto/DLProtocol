@@ -21,23 +21,27 @@ class NotifyCallback {
 
 class DataLinkProtocol {
 public:
-	const char PDU=0;
-	const char ACK=1;
-
-
-
+	const char PDU=0x00;
+	const char ACK=0x01;
+	const char NACK=0x02;
+	void receiveThread();
 	DataLinkProtocol(DeviceDriver* deviceDriver, NotifyCallback* notifyCB );
-	void prepareAndSendMessage(uint8_t sequence, uint8_t tipo, uint8_t protocol, std::string& message);
 	virtual ~DataLinkProtocol();
+	void sendThread();
+	void sendMessage(char* message,size_t messageSize);
 private:
-	void makeCRC(std::string& message, std::string& messageAndCRC);
-	void checkCRC(std::string& message, std::string& messageAndCRC);
-	void sendFrameThread();
-	void receiveFrameThread();
+	void resendLastFrame();
+	std::pair<char*,size_t> prepareMessage(uint8_t sequence, uint8_t tipo, uint8_t protocol,  char* message,size_t messageSize);
+	void updateLastAck(uint8_t lastAck);
+	void validateAndStoreFrame(char * frame, size_t frameSize);
+	Queue<std::pair<char*,size_t>> mInputBuffer;
+	Queue<std::pair<char*,size_t>> mOutputBuffer;
 	DeviceDriver * mDeviceDriver;
 	NotifyCallback * mNotify_cb;
-	Queue<std::string> mInputBuffer;
-	Queue<std::string> mOutputBuffer;
+	volatile uint8_t lastAck;
+	volatile uint8_t lastReceived;
+	uint8_t protocolo;
+	std::pair<char*,size_t> lastFrameSent;
 };
 
 } /* namespace ptc */

@@ -7,33 +7,42 @@
  * Adaptation from https://en.wikibooks.org/wiki/Serial_Programming/Serial_Linux#termios
  *
  */
-
+#include <unistd.h>
 #include "DeviceDriver.h"
 #include "Notifier.h"
 #include "DataLinkProtocol.h"
 
 using namespace ptc;
-
-int main() {
-	DeviceDriver uart { "/dev/ttyUSB0" };
-	DataLinkProtocol protocolo{&uart,nullptr};
-	std::string mes{"\n\rMensagem"};
-	protocolo.prepareAndSendMessage('a','b','c',mes);
-	const char sentinel1 = 0x7E; // ~
-	std::string buffer;
-	while (true) {
-
-		try {
-			uart.receiveByte(buffer);
-			std::cout << buffer;
-		} catch (...) {
-		}
-
+void receiveThread(DataLinkProtocol* protocolo){
+	protocolo->receiveThread();
+}
+void sendThread(DataLinkProtocol* protocolo){
+	while(true){
+		protocolo->sendThread();
 	}
-//
-////	Notifier* reader;
-//	DataLinkProtocol protocol{&uart,reader};
-//	std::string testMsg{"Primeira Mensagem de Teste"};
-//	protocol.prepareAndSendMessage(testMsg);
+}
+
+int main(int argc, char** argv) {
+	DeviceDriver uart {argv[1]};
+	DataLinkProtocol protocolo{&uart,nullptr};
+	std::string mes{"Mensagem~"};
+	std::string mes2{"Mensagem2"};
+//	protocolo.mOutputBuffer.push(Frame);
+
+	std::thread sender(sendThread, &protocolo);
+	std::thread receptor(receiveThread, &protocolo);
+	std::string buffer;
+	std::pair<char*,size_t> frame;
+	protocolo.sendMessage((char*)mes2.c_str(),mes.size());
+	protocolo.sendMessage((char*)mes2.c_str(),mes2.size());
+	//while(true){
+		//sleep(10);
+	//	protocolo.sendMessage((char*)mes2.c_str(),mes.size());
+	//	sleep(5);
+	//	protocolo.sendMessage((char*)mes2.c_str(),mes2.size());
+//	}
+//	sender.join();
+//	receptor.join();
+	sleep(10);
 	return 0;
 }

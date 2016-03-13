@@ -45,15 +45,15 @@ DeviceDriver::DeviceDriver(const std::string& devicePath) {
 
 	tcsetattr(this->tty_fd, TCSANOW, &this->tio);
 }
-void DeviceDriver::receiveByte(std::string& buffer){
+void DeviceDriver::receiveByte(char* buffer, size_t tamanho){
 	std::lock_guard<std::mutex> lock(deviceMutex);
-	if (read(this->tty_fd, &buffer, 1) > 0)
-		write(STDOUT_FILENO, &buffer, 1); // if new data is available on the serial port, print it out
+	if (read(this->tty_fd, buffer, tamanho) > 0)
+		write(STDOUT_FILENO, buffer, tamanho); // if new data is available on the serial port, print it out
 	else throw "No data available";
 }
-void DeviceDriver::sendByte(const std::string& mensagem){
+void DeviceDriver::sendByte(const char* mensagem, size_t tamanho){
 	std::lock_guard<std::mutex> lock(deviceMutex);
-			write(this->tty_fd, mensagem.c_str(), mensagem.size()); // if new data is available on the console, send it to the serial port
+			write(this->tty_fd, mensagem, tamanho); // if new data is available on the console, send it to the serial port
 }
 DeviceDriver::~DeviceDriver() {
 	close(this->tty_fd);
