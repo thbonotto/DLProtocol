@@ -11,7 +11,7 @@ namespace ptc {
 
 class DatagramInterface {
 public:
-	DatagramInterface(char *dev);
+	DatagramInterface(char *dev, char * ip, char * dst);
 	virtual ~DatagramInterface();
 	const int& getFileDescriptor() const{
 		return this->fd;
