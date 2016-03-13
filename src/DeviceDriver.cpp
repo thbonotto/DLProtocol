@@ -49,7 +49,8 @@ void DeviceDriver::receiveByte(char* buffer, size_t tamanho){
 	std::lock_guard<std::mutex> lock(deviceMutex);
 	if (read(this->tty_fd, buffer, tamanho) > 0)
 		write(STDOUT_FILENO, buffer, tamanho); // if new data is available on the serial port, print it out
-	else throw "No data available";
+	else
+		throw "\rNo data available";
 }
 void DeviceDriver::sendByte(const char* mensagem, size_t tamanho){
 	std::lock_guard<std::mutex> lock(deviceMutex);

@@ -15,9 +15,11 @@
 #include <sys/ioctl.h>
 #include <linux/if_tun.h>
 #include <arpa/inet.h>
+#include <mutex>
 
 namespace ptc {
 //tun_alloc()
+std::mutex interfaceMutex;
 DatagramInterface::DatagramInterface(char *dev, char * ip, char * dst) {
 
 	struct ifreq ifr;
@@ -45,6 +47,7 @@ DatagramInterface::DatagramInterface(char *dev, char * ip, char * dst) {
 		perror("");
 		throw err;
 	}
+	dev = (char*) malloc(sizeof(ifr.ifr_name));
 	strcpy(dev, ifr.ifr_name);
 	this->fd = fd;
 
@@ -124,6 +127,18 @@ DatagramInterface::DatagramInterface(char *dev, char * ip, char * dst) {
 
 DatagramInterface::~DatagramInterface() {
 	// TODO Auto-generated destructor stub
+}
+size_t DatagramInterface::receiveDatagram(char* buffer, size_t tamanho){
+	std::lock_guard<std::mutex> lock(interfaceMutex);
+	size_t nBytes = read(this->fd, buffer, tamanho);
+	//	write(STDOUT_FILENO, buffer, tamanho); // if new data is available on the serial port, print it out
+	if(tamanho < 0)
+		throw "\rNo data available";
+	return nBytes;
+}
+void DatagramInterface::sendDatagram(const char* datagram, size_t tamanho){
+	std::lock_guard<std::mutex> lock(interfaceMutex);
+			write(this->fd, datagram, tamanho); // if new data is available on the console, send it to the serial port
 }
 
 } /* namespace ptc */

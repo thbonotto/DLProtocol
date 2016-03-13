@@ -14,9 +14,8 @@ extern "C" {
 }
 namespace ptc {
 
-DataLinkProtocol::DataLinkProtocol(DeviceDriver* deviceDriver,
-		NotifyCallback* notifyCB) :
-		mDeviceDriver { deviceDriver }, mNotify_cb { notifyCB }, lastAck(1), lastReceived(
+DataLinkProtocol::DataLinkProtocol(DeviceDriver* deviceDriver) :
+		mDeviceDriver { deviceDriver }, lastAck(1), lastReceived(
 				5) {
 			protocolo=0;
 	// TODO Auto-generated constructor stub
@@ -30,7 +29,8 @@ DataLinkProtocol::~DataLinkProtocol() {
 	// TODO Auto-generated destructor stub
 }
 void DataLinkProtocol::resendLastFrame() {
-	mDeviceDriver->sendByte(lastFrameSent.first, lastFrameSent.second);
+	if(lastFrameSent.first != nullptr)
+		mDeviceDriver->sendByte(lastFrameSent.first, lastFrameSent.second);
 }
 void DataLinkProtocol::validateAndStoreFrame(char * frame, size_t frameSize) {
 	uint8_t sequence;
@@ -44,15 +44,15 @@ void DataLinkProtocol::validateAndStoreFrame(char * frame, size_t frameSize) {
 			frameSize - 2);
 	char * calcCRC;
 	calcCRC = (char *) &calculatedCRC;
-	std::cout << "\rCRC calculado: " << calcCRC[0] << calcCRC[1] << std::endl;
-	std::cout << "\rCRC Recebido: " << frameCRC[0] << frameCRC[1] << std::endl;
+	printf( "\rRecebido Frame do tipo: \"\\0x%x\" \r\n", (unsigned char)frameWithCRC[1]);
+	printf( "\rCRC calculado: \\0x%x\\0x%x \r\n", (unsigned char)calcCRC[0], (unsigned char)calcCRC[1]);
+	printf( "\rCRC recebido: \\0x%x\\0x%x \r\n", (unsigned char)frameCRC[0], (unsigned char)frameCRC[1]);
 	/**
 	 * CRC is fine.
 	 * Checking now if it's a ACK or NACK frame
 	 */
 	sequence = frameWithCRC[0];
 	tipo = frameWithCRC[1];
-	std::cout << "\rCRC TIPO: " << std::to_string(tipo) << std::endl;
 	protocolo = frameWithCRC[2];
 	char* payload = &frameWithCRC[3];
 	/**
@@ -70,31 +70,36 @@ void DataLinkProtocol::validateAndStoreFrame(char * frame, size_t frameSize) {
 			/**
 			 * Verifying if it's receiving last send frame ack.
 			 */
-			if (sequence != lastReceived)
+			if (sequence == lastAck){
 				lastReceived = sequence;
-			else
+				printf( "\rAtualizando ultimo ack recebido: \\0x%x \r\n", sequence);
+			}
+
+			else{
 				// Duplicate ACK - retransmission
+				printf( "\rSeq number diferente do ultimo enviado, retransmitindo ultimo frame: \\0x%x \r\n", sequence);
 				resendLastFrame();
+			}
 			return;
 		} else if (tipo == NACK) {
 			/**
 			 * Verifying if it's receiving last send frame nack.
 			 * Else ignore.
 			 */
-			if (sequence == lastAck)
+			if (sequence == lastAck){
+				printf( "\r recebido NACL com Seq number igual do ultimo enviado, retransmitindo ultimo frame: \\0x%x \r\n", sequence);
 				resendLastFrame();
 			return;
+			}
 		} else if (tipo == PDU) {
 		/**
 		 * Ok, it's a payload message that must be delivered to up layer.
 		 * And send ack.
 		 */
-
-		std::cout << "\rEntregando frame n: " << std::to_string(sequence) << " Do tipo: " << std::to_string(tipo)
-				<< " Para o protocolo: " << std::to_string(protocolo) << std::endl
-				<< "\rCom payload: " << std::string(payload, payloadSize)
-				<< std::endl;
-		std::pair<char*, size_t> frameOK { frame, frameSize };
+			printf( "\rEntregando frame n: \\0x%x Do tipo: \\0x%x   Para o protocolo: \\0x%x \r\n", sequence, tipo, protocolo);
+		std::cout << "Payload: \"" << std::string(payload, payloadSize) << "\"" << std::endl;
+//		std::pair<char*, size_t> frameOK { frame, frameSize };
+		std::pair<char*, size_t> frameOK { payload, payloadSize };
 		mInputBuffer.push(frameOK);
 		std::string ack("ack");
 		std::cout << "\rPreparando para enviar ack n: " << std::to_string(sequence)
@@ -102,7 +107,7 @@ void DataLinkProtocol::validateAndStoreFrame(char * frame, size_t frameSize) {
 		std::pair<char*, size_t> ackMsg = prepareMessage(sequence, ACK,
 				protocolo, (char*)ack.c_str(),ack.size());
 		mDeviceDriver->sendByte(ackMsg.first, ackMsg.second);
-		std::cout << "\r Enviado ack n: " << std::to_string(sequence) <<
+		std::cout << "\rEnviado ack n: " << std::to_string(sequence) <<
 						"tipo : " <<	std::to_string(ackMsg.first[2])	<< std::endl;
 		lastReceived=tipo;
 		}
@@ -218,12 +223,13 @@ void DataLinkProtocol::sendThread() {
 	mDeviceDriver->sendByte(frame.first, frame.second);
 	lastFrameSent = frame;
 	lastAck = frame.first[1];
+	std::cout << "\rAtualizando valor do ultimo seq enviado: " << std::to_string(lastAck) << std::endl;
 	sleep(1);
 	while (lastAck != lastReceived) {
-		mDeviceDriver->sendByte(frame.first, frame.second);
+	//	mDeviceDriver->sendByte(frame.first, frame.second);
 		std::cout << "\rSeq last send: " << std::to_string(lastAck) << std::endl;
 		std::cout << "\rSeq last ack: " << std::to_string(lastReceived) << std::endl;
-		sleep(5);
+		//sleep(10);
 	}
 }
 void DataLinkProtocol::sendMessage(char* message,size_t messageSize){
