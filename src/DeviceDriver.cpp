@@ -39,22 +39,32 @@ DeviceDriver::DeviceDriver(const std::string& devicePath) {
 	this->tio.c_cc[VMIN] = 1;
 	this->tio.c_cc[VTIME] = 5;
 
-	this->tty_fd = open(devicePath.c_str(), O_RDWR | O_NONBLOCK);
+	this->tty_fd = open(devicePath.c_str(), O_RDWR );
 	cfsetospeed(&this->tio, B9600);            // 115200 baud
 	cfsetispeed(&this->tio, B9600);            // 115200 baud
 
 	tcsetattr(this->tty_fd, TCSANOW, &this->tio);
 }
 void DeviceDriver::receiveByte(char* buffer, size_t tamanho){
-	std::lock_guard<std::mutex> lock(deviceMutex);
-	if (read(this->tty_fd, buffer, tamanho) > 0)
-		write(STDOUT_FILENO, buffer, tamanho); // if new data is available on the serial port, print it out
-	else
-		throw "\rNo data available";
+	//  std::lock_guard<std::mutex> lock(deviceMutex);
+	  struct timeval timeout; // para especificar o timeout
+	  timeout.tv_sec = 2; //timeout de 2 segundos
+	  timeout.tv_usec = 0;
+
+	  fd_set espera;
+	  //FD_ZERO(&espera);
+	  //FD_SET(this->tty_fd, &espera);
+
+	  //if (select(this->tty_fd, &espera, NULL, NULL, &timeout) == 0) { // timeout !!
+		//  throw "\rTimeout";
+	//  } else {
+		  read(this->tty_fd, buffer, tamanho);
+		//  write( STDOUT_FILENO, buffer, tamanho);
+	//  }
 }
 void DeviceDriver::sendByte(const char* mensagem, size_t tamanho){
 	std::lock_guard<std::mutex> lock(deviceMutex);
-			write(this->tty_fd, mensagem, tamanho); // if new data is available on the console, send it to the serial port
+	write(this->tty_fd, mensagem, tamanho); // if new data is available on the console, send it to the serial port
 }
 DeviceDriver::~DeviceDriver() {
 	close(this->tty_fd);
