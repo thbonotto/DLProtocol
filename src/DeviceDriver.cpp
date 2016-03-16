@@ -18,7 +18,7 @@ namespace ptc {
 std::mutex deviceMutex;
 
 DeviceDriver::DeviceDriver(const std::string& devicePath) {
-	tcgetattr(STDOUT_FILENO, &this->old_stdio);
+	//tcgetattr(STDOUT_FILENO, &this->old_stdio);
 
 	memset(&this->stdio, 0, sizeof(this->stdio));
 	this->stdio.c_iflag = 0;
@@ -27,9 +27,9 @@ DeviceDriver::DeviceDriver(const std::string& devicePath) {
 	this->stdio.c_lflag = 0;
 	this->stdio.c_cc[VMIN] = 1;
 	this->stdio.c_cc[VTIME] = 0;
-	tcsetattr(STDOUT_FILENO, TCSANOW, &this->stdio);
-	tcsetattr(STDOUT_FILENO, TCSAFLUSH, &this->stdio);
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);     // make the reads non-blocking
+//	tcsetattr(STDOUT_FILENO, TCSANOW, &this->stdio);
+//	tcsetattr(STDOUT_FILENO, TCSAFLUSH, &this->stdio);
+//	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);     // make the reads non-blocking
 
 	memset(&this->tio, 0, sizeof(this->tio));
 	this->tio.c_iflag = 0;
@@ -68,7 +68,7 @@ void DeviceDriver::sendByte(const char* mensagem, size_t tamanho){
 }
 DeviceDriver::~DeviceDriver() {
 	close(this->tty_fd);
-	tcsetattr(STDOUT_FILENO, TCSANOW, &this->old_stdio);
+	//tcsetattr(STDOUT_FILENO, TCSANOW, &this->old_stdio);
 }
 
 } /* namespace ptc */

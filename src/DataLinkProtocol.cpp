@@ -252,15 +252,15 @@ void DataLinkProtocol::sendThread() {
 	std::cout << "\rAtualizando valor do ultimo seq enviado: "
 			<< std::to_string(lastAck) << std::endl;
 	sleep(1);
-	//while (lastAck != lastReceived) {
-		//sleep(10);
-		//mDeviceDriver->sendByte(frame.first, frame.second);
+	while (lastAck != lastReceived) {
+		sleep(10);
+		mDeviceDriver->sendByte(frame.first, frame.second);
 		std::cout << "\rSeq last send: " << std::to_string(lastAck)
 				<< std::endl;
 		std::cout << "\rSeq last ack: " << std::to_string(lastReceived)
 				<< std::endl;
 
-	//}
+	}
 }
 void DataLinkProtocol::sendMessage(char* message, size_t messageSize) {
 	std::pair<char*, size_t> msg { message, messageSize };

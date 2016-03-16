@@ -40,13 +40,13 @@ void bufferThread(DataLinkProtocol* protocolo, DatagramInterface* interface) {
 	while (true) {
 		try {
 			std::cout << "\rProdutora lendo" << std::endl;
-			//nBytes = interface->receiveDatagram(buffer, 255);
+			nBytes = interface->receiveDatagram(buffer, 255);
 			char* message = (char*) malloc(nBytes);
-			//std::cout << "\rMessage: " << message << "tamanho :"
-			//	<< std::to_string(nBytes) << std::endl;
-			interface->receiveDatagram(message, 84);
+			std::cout << "\rMessage: " << message << "tamanho :"
+				<< std::to_string(nBytes) << std::endl;
+			interface->receiveDatagram(message, nBytes);
 			protocolo->sendMessage(message, nBytes);
-			//nBytes = 0;
+			nBytes = 0;
 
 		} catch (const char* e) {
 			std::cout << e << std::endl;
