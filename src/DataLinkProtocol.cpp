@@ -13,10 +13,12 @@ extern "C" {
 #include "crc.h"
 }
 namespace ptc {
-
+const char PDU=0x00;
+const char ACK=0x01;
+const char NACK=0x02;
 DataLinkProtocol::DataLinkProtocol(DeviceDriver* deviceDriver,
 		DatagramInterface* interface) :
-		mDeviceDriver { deviceDriver }, mDatagramInterface { interface }, lastAck(
+		mDeviceDriver ( deviceDriver ), mDatagramInterface ( interface ), lastAck(
 				1), lastReceived(0) {
 	protocolo = 0;
 	// TODO Auto-generated constructor stub

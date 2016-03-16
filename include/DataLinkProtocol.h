@@ -17,9 +17,6 @@ namespace ptc {
 
 class DataLinkProtocol {
 public:
-	const char PDU=0x00;
-	const char ACK=0x01;
-	const char NACK=0x02;
 	void receiveThread();
 	DataLinkProtocol(DeviceDriver* deviceDriver, DatagramInterface* interface);
 	virtual ~DataLinkProtocol();
